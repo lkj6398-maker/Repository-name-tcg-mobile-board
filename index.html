@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"/>
+<title>TCG THE RED MOBILE BOARD</title>
+
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#050607">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TCG THE RED">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+
+<style>
+:root{
+  --bg:#050607;
+  --panel:#0b0d10;
+  --panel2:#12151a;
+  --line:rgba(255,255,255,.12);
+  --muted:#858b94;
+  --text:#f6f7f8;
+  --red:#ff3b43;
+  --gold:#f2c14e;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:#000;color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+body{min-height:100dvh;padding:10px 10px calc(92px + env(safe-area-inset-bottom))}
+button,input{font:inherit}
+.app{
+  min-height:calc(100dvh - 20px);
+  border:1px solid rgba(255,59,67,.32);
+  border-radius:24px;
+  background:
+    radial-gradient(circle at 50% 0%,rgba(255,59,67,.08),transparent 34%),
+    linear-gradient(180deg,#08090b,#040506 70%);
+  box-shadow:0 0 30px rgba(255,59,67,.08);
+  overflow:hidden;
+  position:relative;
+}
+.header{padding:18px 16px 8px;text-align:center}
+.brand{
+  font-size:11px;letter-spacing:.32em;font-weight:800;color:#e7e8ea;
+  cursor:pointer;display:inline-block
+}
+.redline{width:48px;height:3px;background:var(--red);border-radius:99px;margin:8px auto 10px;box-shadow:0 0 10px rgba(255,59,67,.5)}
+.title-row{display:flex;align-items:center;justify-content:center;gap:8px}
+.title{
+  margin:0;font-size:30px;line-height:1.08;font-weight:950;letter-spacing:-.04em;
+  cursor:pointer;word-break:keep-all
+}
+.spinner{
+  width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,.15);
+  border-top-color:var(--red);opacity:0;transform:scale(.7)
+}
+.app.reordering .spinner{opacity:1;animation:spin .55s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.progress{padding:8px 18px 12px}
+.progress-head{display:flex;justify-content:space-between;font-size:12px;font-weight:800;color:#aeb3ba;margin-bottom:7px}
+.progress-head strong{font-size:14px;color:#fff}
+.bar{height:8px;background:#15181d;border-radius:99px;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
+.bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,#b60f1a,#ff3b43);transition:width .18s ease}
+.grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  padding:0 12px 12px;
+}
+.slot{
+  min-height:88px;border:1px dashed rgba(255,255,255,.16);border-radius:17px;
+  background:linear-gradient(180deg,rgba(20,23,28,.88),rgba(10,12,15,.92));
+  padding:12px;display:flex;align-items:center;gap:10px;position:relative;
+  transition:.18s ease;overflow:hidden;cursor:pointer
+}
+.slot.filled{
+  border-style:solid;border-color:rgba(255,71,78,.38);
+  box-shadow:0 0 14px rgba(255,59,67,.06)
+}
+.slot.next-target{
+  border-color:rgba(255,79,86,.9)!important;
+  box-shadow:0 0 18px rgba(255,59,67,.22),inset 0 0 14px rgba(255,59,67,.08)
+}
+.num{
+  flex:none;width:46px;height:46px;border-radius:13px;border:1px solid rgba(255,255,255,.18);
+  display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:950
+}
+.info{min-width:0}
+.name{font-size:17px;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status{margin-top:4px;font-size:10px;font-weight:800;color:#737983}
+.slot.filled .status{color:#ff7e84}
+.prize{
+  margin:2px 12px 10px;padding:12px;border-radius:18px;border:1px solid rgba(242,193,78,.55);
+  background:linear-gradient(135deg,rgba(242,193,78,.10),rgba(14,12,7,.75));
+  display:flex;gap:12px;align-items:center
+}
+.photo{
+  width:72px;height:72px;flex:none;border-radius:14px;border:1px solid rgba(255,255,255,.10);
+  background:#0d0f12;display:flex;align-items:center;justify-content:center;overflow:hidden;
+  color:#8f959d;font-size:11px;font-weight:800;cursor:pointer
+}
+.photo img{max-width:100%;max-height:100%;object-fit:contain;display:none}
+.prize-copy{min-width:0;cursor:pointer}
+.eyebrow{font-size:10px;letter-spacing:.14em;color:var(--gold);font-weight:950}
+.prize-name{font-size:19px;font-weight:950;line-height:1.12;margin-top:4px}
+.lower{
+  margin:0 12px 14px;padding:10px 12px;border-top:1px solid rgba(255,255,255,.08);
+  color:#c9ccd0;font-size:12px;font-weight:800;cursor:pointer
+}
+.reorder-tray{
+  margin:0 12px 16px;border:1px solid rgba(255,59,67,.35);border-radius:18px;
+  background:linear-gradient(180deg,#0f1115,#08090b);padding:10px;display:none
+}
+.app.reordering .reorder-tray{display:block}
+.tray-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.tray-head span{font-size:10px;letter-spacing:.16em;color:#ff7379;font-weight:950}
+.tray-head strong{font-size:12px}
+.tray-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tray-tile{
+  min-height:46px;border:1px solid rgba(255,255,255,.12);border-radius:12px;
+  background:#171a1f;color:#fff;display:flex;align-items:center;gap:8px;padding:8px 10px;
+  font-size:13px;font-weight:900;text-align:left;transition:.12s ease
+}
+.tray-tile:active{transform:scale(.97)}
+.tray-tile.used{opacity:.18;pointer-events:none}
+.tray-no{color:#ff747a;font-size:10px;width:28px;flex:none}
+.tray-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.controls{
+  position:fixed;left:0;right:0;bottom:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.93) 26%,#000);
+  z-index:50
+}
+.ctrl{
+  height:50px;border-radius:15px;border:1px solid rgba(255,255,255,.13);
+  background:#171a1f;color:#fff;font-weight:950
+}
+.ctrl.primary{
+  border-color:rgba(255,59,67,.6);
+  background:linear-gradient(180deg,#7d1018,#4f0910);
+  box-shadow:0 0 16px rgba(255,59,67,.12)
+}
+.modal-back{
+  position:fixed;inset:0;background:rgba(0,0,0,.68);display:none;align-items:flex-end;z-index:100;
+  backdrop-filter:blur(5px)
+}
+.modal-back.show{display:flex}
+.modal{
+  width:100%;background:#101216;border-radius:22px 22px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));
+  border-top:1px solid rgba(255,255,255,.12)
+}
+.modal-title{font-size:13px;font-weight:900;color:#cdd1d6;margin-bottom:10px}
+.modal input{
+  width:100%;height:52px;border-radius:14px;border:1px solid rgba(255,255,255,.14);
+  background:#181b20;color:#fff;padding:0 14px;font-size:17px;font-weight:850;outline:none
+}
+.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.modal-btn{height:48px;border-radius:13px;border:1px solid rgba(255,255,255,.12);background:#1a1d22;color:#fff;font-weight:900}
+.modal-btn.ok{background:#7c1119;border-color:#b71a25}
+.toast{
+  position:fixed;left:50%;bottom:90px;transform:translate(-50%,10px);
+  background:rgba(18,20,24,.96);border:1px solid rgba(255,255,255,.12);border-radius:999px;
+  padding:9px 13px;font-size:12px;font-weight:850;opacity:0;pointer-events:none;transition:.18s ease;z-index:200
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.assign-flash{animation:assign .38s cubic-bezier(.16,1,.3,1)}
+@keyframes assign{0%{transform:scale(.94)}55%{transform:scale(1.035)}100%{transform:scale(1)}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="header">
+    <div class="brand" id="brand">TCG THE RED</div>
+    <div class="redline"></div>
+    <div class="title-row">
+      <h1 class="title" id="title">올마이트 라인업자</h1>
+      <div class="spinner"></div>
+    </div>
+  </div>
+
+  <div class="progress">
+    <div class="progress-head"><span>참가 현황</span><strong id="count">0 / 10</strong></div>
+    <div class="bar"><span id="bar"></span></div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="prize">
+    <div class="photo" id="photoBox">
+      <span id="photoHint">사진 터치</span>
+      <img id="photoImg" alt="">
+    </div>
+    <div class="prize-copy" id="prizeCopy">
+      <div class="eyebrow">LAST ONE PRIZE</div>
+      <div class="prize-name" id="lastPrize">올마이트 MASTERLISE EXTRA</div>
+    </div>
+  </div>
+
+  <div class="lower" id="lower">LOWER PRIZE · 하위상 H 20~40</div>
+
+  <div class="reorder-tray" id="tray">
+    <div class="tray-head">
+      <span>REORDER QUEUE</span>
+      <strong id="trayCount">0</strong>
+    </div>
+    <div class="tray-list" id="trayList"></div>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="ctrl primary" id="reorderBtn">재배치</button>
+  <button class="ctrl" id="resetBtn">초기화</button>
+</div>
+
+<div class="modal-back" id="modalBack">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">수정</div>
+    <input id="modalInput" autocomplete="off">
+    <div class="modal-actions">
+      <button class="modal-btn" id="cancelBtn">취소</button>
+      <button class="modal-btn ok" id="okBtn">확인</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="photoInput" accept="image/*" hidden>
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY="tcgMobileBoardV1";
+const defaults={
+  brand:"TCG THE RED",
+  title:"올마이트 라인업자",
+  lastPrize:"올마이트 MASTERLISE EXTRA",
+  lower:"하위상 H 20~40",
+  names:Array(10).fill(""),
+  image:""
+};
+let state=load();
+let reorderMode=false;
+let queue=[];
+let used=[];
+let nextIndex=0;
+let targets=[];
+
+const order=[1,6,2,7,3,8,4,9,5,10];
+const grid=document.getElementById("grid");
+
+function load(){
+  try{
+    const x=JSON.parse(localStorage.getItem(KEY)||"null");
+    return {...defaults,...x,names:Array.isArray(x?.names)?[...Array(10)].map((_,i)=>x.names[i]||""):Array(10).fill("")};
+  }catch(e){return structuredClone(defaults)}
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function toast(msg){
+  const el=document.getElementById("toast");
+  el.textContent=msg; el.classList.add("show");
+  clearTimeout(toast.t); toast.t=setTimeout(()=>el.classList.remove("show"),1100);
+}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]))}
+
+for(const n of order){
+  const d=document.createElement("div");
+  d.className="slot";
+  d.id="slot"+n;
+  d.innerHTML=`<div class="num">${String(n).padStart(2,"0")}</div>
+               <div class="info"><div class="name" id="name${n}">빈자리</div>
+               <div class="status" id="status${n}">모집중..</div></div>`;
+  d.onclick=()=>{ if(!reorderMode) editName(n); };
+  grid.appendChild(d);
+}
+
+function render(){
+  document.getElementById("brand").textContent=state.brand;
+  document.getElementById("title").textContent=state.title;
+  document.getElementById("lastPrize").textContent=state.lastPrize;
+  document.getElementById("lower").textContent="LOWER PRIZE · "+state.lower;
+
+  let filled=0;
+  for(let i=1;i<=10;i++){
+    const name=(state.names[i-1]||"").trim();
+    const slot=document.getElementById("slot"+i);
+    document.getElementById("name"+i).textContent=name||"빈자리";
+    document.getElementById("status"+i).textContent=name?"확정":"모집중..";
+    slot.classList.toggle("filled",!!name);
+    slot.classList.remove("next-target");
+    if(name) filled++;
+  }
+  document.getElementById("count").textContent=`${filled} / 10`;
+  document.getElementById("bar").style.width=`${filled*10}%`;
+
+  const img=document.getElementById("photoImg");
+  const hint=document.getElementById("photoHint");
+  if(state.image){ img.src=state.image; img.style.display="block"; hint.style.display="none"; }
+  else{ img.removeAttribute("src"); img.style.display="none"; hint.style.display="block"; }
+
+  if(reorderMode){
+    const t=targets[nextIndex];
+    if(t) document.getElementById("slot"+t)?.classList.add("next-target");
+  }
+  renderTray();
+}
+
+let editCallback=null;
+function openEditor(title,value,cb){
+  document.getElementById("modalTitle").textContent=title;
+  const input=document.getElementById("modalInput");
+  input.value=value||"";
+  editCallback=cb;
+  document.getElementById("modalBack").classList.add("show");
+  setTimeout(()=>{input.focus();input.select()},120);
+}
+function closeEditor(){document.getElementById("modalBack").classList.remove("show");editCallback=null}
+document.getElementById("cancelBtn").onclick=closeEditor;
+document.getElementById("okBtn").onclick=()=>{
+  const val=document.getElementById("modalInput").value.trim();
+  if(editCallback) editCallback(val);
+  closeEditor();
+};
+document.getElementById("modalInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter") document.getElementById("okBtn").click();
+});
+document.getElementById("modalBack").addEventListener("click",e=>{if(e.target.id==="modalBack")closeEditor()});
+
+function editName(n){
+  openEditor(`${n}번 참가자`,state.names[n-1],val=>{
+    state.names[n-1]=val; save(); render();
+    const s=document.getElementById("slot"+n); s.classList.add("assign-flash");
+    setTimeout(()=>s.classList.remove("assign-flash"),420);
+  });
+}
+document.getElementById("brand").onclick=()=>openEditor("브랜드명",state.brand,v=>{state.brand=v||defaults.brand;save();render()});
+document.getElementById("title").onclick=()=>openEditor("상품명",state.title,v=>{state.title=v||defaults.title;save();render()});
+document.getElementById("prizeCopy").onclick=()=>openEditor("라스트원 최고상",state.lastPrize,v=>{state.lastPrize=v||defaults.lastPrize;save();render()});
+document.getElementById("lower").onclick=()=>openEditor("하위상 문구",state.lower,v=>{state.lower=v||defaults.lower;save();render()});
+
+document.getElementById("photoBox").onclick=()=>document.getElementById("photoInput").click();
+document.getElementById("photoInput").onchange=e=>{
+  const f=e.target.files?.[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{state.image=r.result;save();render();toast("사진 적용 완료")};
+  r.readAsDataURL(f); e.target.value="";
+};
+
+function startReorder(){
+  const active=[];
+  for(let i=0;i<10;i++) if((state.names[i]||"").trim()) active.push(i+1);
+  if(!active.length){toast("참가자가 없습니다");return}
+
+  reorderMode=true;
+  targets=[...active];
+  queue=active.map(n=>({slot:n,name:state.names[n-1]}));
+  used=Array(queue.length).fill(false);
+  nextIndex=0;
+
+  state.names=Array(10).fill("");
+  save();
+  document.getElementById("app").classList.add("reordering");
+  document.getElementById("reorderBtn").textContent="재배치 중";
+  render();
+  document.getElementById("tray").scrollIntoView({behavior:"smooth",block:"end"});
+}
+
+function renderTray(){
+  const list=document.getElementById("trayList");
+  list.innerHTML="";
+  document.getElementById("trayCount").textContent=String(queue.length-used.filter(Boolean).length);
+  if(!reorderMode)return;
+
+  queue.forEach((item,idx)=>{
+    const b=document.createElement("button");
+    b.className="tray-tile"+(used[idx]?" used":"");
+    b.innerHTML=`<span class="tray-no">${String(item.slot).padStart(2,"0")}</span><span class="tray-name">${esc(item.name)}</span>`;
+    b.onclick=()=>assignFromTray(idx,b);
+    list.appendChild(b);
+  });
+}
+
+function assignFromTray(idx,btn){
+  if(!reorderMode||used[idx])return;
+  const target=targets[nextIndex];
+  if(!target)return;
+
+  state.names[target-1]=queue[idx].name;
+  used[idx]=true;
+  nextIndex++;
+  save();
+  render();
+
+  const slot=document.getElementById("slot"+target);
+  slot.classList.add("assign-flash");
+  setTimeout(()=>slot.classList.remove("assign-flash"),380);
+  slot.scrollIntoView({behavior:"smooth",block:"center"});
+
+  if(used.every(Boolean)){
+    reorderMode=false;
+    document.getElementById("app").classList.remove("reordering");
+    document.getElementById("reorderBtn").textContent="재배치";
+    setTimeout(()=>{renderTray();toast("재배치 완료")},250);
+  }
+}
+
+document.getElementById("reorderBtn").onclick=()=>{
+  if(reorderMode){toast("아래 참가자를 순서대로 눌러주세요");return}
+  startReorder();
+};
+
+document.getElementById("resetBtn").onclick=()=>{
+  if(!confirm("참가자 이름을 모두 초기화할까요?"))return;
+  reorderMode=false;queue=[];used=[];targets=[];nextIndex=0;
+  state.names=Array(10).fill("");
+  save();
+  document.getElementById("app").classList.remove("reordering");
+  document.getElementById("reorderBtn").textContent="재배치";
+  render();
+  toast("초기화 완료");
+};
+
+render();
+</script>
+
+<script>
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(console.error);
+  });
+}
+</script>
+
+</body>
+</html>
